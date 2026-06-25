@@ -13,6 +13,7 @@ import { fetchWeather } from "../services/weatherService";
 import { fetchHotspots, isFirmsConfigured } from "../services/fireService";
 import { ZONE_COORDS } from "../services/coordinates";
 import subZones, { getSubZonesByParent } from "../data/subZones";
+import { saveReading, saveAlert, saveEvent, saveZone } from "../services/supabaseService";
 
 // =============================== Types ===============================
 
@@ -999,6 +1000,35 @@ export default function App() {
   const intervalRef = useRef<ReturnType<typeof setInterval> | null>(null);
   const realDataIndexRef = useRef(0)
 
+  // Persist seed data to Supabase on mount
+  useEffect(() => {
+    const zs = seedZones()
+    for (const z of zs) saveZone({ id: z.id, name: z.name, risk: z.risk, temp: z.temp, humidity: z.humidity, wind: z.wind, last_update: z.lastUpdate?.toISOString() || null })
+    for (const a of SEED_ALERTS) saveAlert(toDbAlert(a))
+    for (const e of SEED_EVENTS) saveEvent(toDbEvent(e))
+  }, [])
+
+  // Persist to Supabase (fire-and-forget)
+  const toDbReading = (r: Reading) => ({
+    id: r.id, zone_id: r.zoneId, zone_name: r.zoneName,
+    timestamp: r.timestamp.toISOString(), temp: r.temp, humidity: r.humidity, wind: r.wind,
+    valid: r.valid, rejection_reason: r.rejectionReason || null,
+    generated_alert: r.generatedAlert, risk: r.risk,
+  })
+  const toDbAlert = (a: Alert) => ({
+    id: a.id, timestamp: a.timestamp.toISOString(), zone_id: a.zoneId, zone_name: a.zoneName,
+    risk: a.risk, temp: a.temp, humidity: a.humidity, wind: a.wind, status: a.status,
+  })
+  const toDbEvent = (e: HistoricalEvent) => ({
+    id: e.id, timestamp: e.timestamp.toISOString(), zone_id: e.zoneId, zone_name: e.zoneName,
+    temp: e.temp, humidity: e.humidity, wind: e.wind, risk: e.risk, alert_type: e.alertType,
+  })
+  const toDbZone = (z: Zone) => ({
+    id: z.id, name: z.name, risk: z.risk,
+    temp: z.temp, humidity: z.humidity, wind: z.wind,
+    last_update: z.lastUpdate?.toISOString() || null,
+  })
+
   const pickSubZone = useCallback((parentId: string): string | null => {
     const subs = getSubZonesByParent(parentId)
     if (subs.length === 0) return null
@@ -1027,6 +1057,7 @@ export default function App() {
         setTotalReadings(c => c + 1)
         setRejectedCount(c => c + 1)
         setLastUpdate(now)
+        saveReading(toDbReading(reading))
         return
       }
 
@@ -1046,6 +1077,8 @@ export default function App() {
           setAlerts(prev => [newAlert, ...prev].slice(0, 50))
           const newEvent: HistoricalEvent = { id: uid(), timestamp: now, zoneId: zd.id, zoneName: zd.name, temp: t, humidity: h, wind: w, risk, alertType: risk === "CRITICO" ? "Alerta crítica activada" : "Alerta preventiva activada" }
           setEvents(prev => [newEvent, ...prev].slice(0, 200))
+          saveAlert(toDbAlert(newAlert))
+          saveEvent(toDbEvent(newEvent))
           const picked = pickSubZone(zd.id)
           if (picked) setActiveSubZones(prev => ({ ...prev, [zd.id]: picked }))
         } else {
@@ -1056,9 +1089,12 @@ export default function App() {
         setRejectedCount(c => c + 1)
       }
 
+      saveZone({ id: zd.id, name: zd.name, risk, temp: t ?? null, humidity: h ?? null, wind: w ?? null, last_update: now.toISOString() })
+
       setReadings(prev => [reading, ...prev].slice(0, 100))
       setTotalReadings(c => c + 1)
       setLastUpdate(now)
+      saveReading(toDbReading(reading))
       return
     }
 
@@ -1084,12 +1120,15 @@ export default function App() {
         setAlerts(prev => [newAlert, ...prev].slice(0, 50))
         const newEvent: HistoricalEvent = { id: uid(), timestamp: now, zoneId: zd.id, zoneName: zd.name, temp: t, humidity: h, wind: w, risk, alertType: risk === "CRITICO" ? "Alerta crítica activada" : "Alerta preventiva activada" }
         setEvents(prev => [newEvent, ...prev].slice(0, 200))
+        saveAlert(toDbAlert(newAlert))
+        saveEvent(toDbEvent(newEvent))
         const picked = pickSubZone(zd.id)
         if (picked) setActiveSubZones(prev => ({ ...prev, [zd.id]: picked }))
       } else {
         setActiveSubZones(prev => { const n = { ...prev }; delete n[zd.id]; return n })
       }
       setZones(prev => prev.map(z => z.id === zd.id ? { ...z, risk, temp: t, humidity: h, wind: w, lastUpdate: now } : z))
+      saveZone({ id: zd.id, name: zd.name, risk, temp: t, humidity: h, wind: w, last_update: now.toISOString() })
     } else {
       setRejectedCount(c => c + 1)
     }
@@ -1097,6 +1136,7 @@ export default function App() {
     setReadings(prev => [reading, ...prev].slice(0, 100))
     setTotalReadings(c => c + 1)
     setLastUpdate(now)
+    saveReading(toDbReading(reading))
   }, [simScenario, dataSource, pickSubZone])
 
   useEffect(() => {

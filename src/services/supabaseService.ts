@@ -64,7 +64,7 @@ export async function saveReading(r: DBReading): Promise<void> {
   if (!isSupabaseConfigured()) return
   try {
     await supabase.from("readings").upsert(r, { onConflict: "id" })
-  } catch { /* ignore */ }
+  } catch (e) { console.error("[Supabase] saveReading error:", e) }
 }
 
 export async function getReadings(limit = 100): Promise<DBReading[]> {
@@ -85,7 +85,7 @@ export async function saveAlert(a: DBAlert): Promise<void> {
   if (!isSupabaseConfigured()) return
   try {
     await supabase.from("alerts").upsert(a, { onConflict: "id" })
-  } catch { /* ignore */ }
+  } catch (e) { console.error("[Supabase] saveAlert error:", e) }
 }
 
 export async function getAlerts(limit = 50): Promise<DBAlert[]> {
@@ -97,14 +97,14 @@ export async function getAlerts(limit = 50): Promise<DBAlert[]> {
       .order("timestamp", { ascending: false })
       .limit(limit)
     return (data as DBAlert[]) || []
-  } catch { return [] }
+  } catch (e) { console.error("[Supabase] getAlerts error:", e); return [] }
 }
 
 export async function updateAlertStatus(id: string, status: string): Promise<void> {
   if (!isSupabaseConfigured()) return
   try {
     await supabase.from("alerts").update({ status }).eq("id", id)
-  } catch { /* ignore */ }
+  } catch (e) { console.error("[Supabase] updateAlertStatus error:", e) }
 }
 
 // ---- Events ----
@@ -113,7 +113,7 @@ export async function saveEvent(e: DBEvent): Promise<void> {
   if (!isSupabaseConfigured()) return
   try {
     await supabase.from("events").upsert(e, { onConflict: "id" })
-  } catch { /* ignore */ }
+  } catch (err) { console.error("[Supabase] saveEvent error:", err) }
 }
 
 export async function getEvents(limit = 200): Promise<DBEvent[]> {
@@ -125,7 +125,7 @@ export async function getEvents(limit = 200): Promise<DBEvent[]> {
       .order("timestamp", { ascending: false })
       .limit(limit)
     return (data as DBEvent[]) || []
-  } catch { return [] }
+  } catch (e) { console.error("[Supabase] getEvents error:", e); return [] }
 }
 
 // ---- Zones ----
@@ -134,7 +134,7 @@ export async function saveZone(z: DBZone): Promise<void> {
   if (!isSupabaseConfigured()) return
   try {
     await supabase.from("zones").upsert(z, { onConflict: "id" })
-  } catch { /* ignore */ }
+  } catch (e) { console.error("[Supabase] saveZone error:", e) }
 }
 
 export async function saveZones(zones: DBZone[]): Promise<void> {
@@ -149,7 +149,7 @@ export async function getZones(): Promise<DBZone[]> {
   try {
     const { data } = await supabase.from("zones").select("*")
     return (data as DBZone[]) || []
-  } catch { return [] }
+  } catch (e) { console.error("[Supabase] getZones error:", e); return [] }
 }
 
 // ---- Hotspots ----
@@ -159,7 +159,7 @@ export async function saveHotspots(hotspots: DBHotspot[]): Promise<void> {
   if (hotspots.length === 0) return
   try {
     await supabase.from("hotspots").upsert(hotspots, { onConflict: "id" })
-  } catch { /* ignore */ }
+  } catch (e) { console.error("[Supabase] saveHotspots error:", e) }
 }
 
 export async function getHotspots(): Promise<DBHotspot[]> {
@@ -171,5 +171,5 @@ export async function getHotspots(): Promise<DBHotspot[]> {
       .order("acq_date", { ascending: false })
       .limit(100)
     return (data as DBHotspot[]) || []
-  } catch { return [] }
+  } catch (e) { console.error("[Supabase] getHotspots error:", e); return [] }
 }
