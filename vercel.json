@@ -1,8 +1,8 @@
 {
   "framework": "vite",
-  "buildCommand": "npx pnpm run build",
+  "buildCommand": "npm run build",
   "outputDirectory": "dist",
-  "installCommand": "npx pnpm install",
+  "installCommand": "npm install",
   "rewrites": [
     {
       "source": "/(.*)",
