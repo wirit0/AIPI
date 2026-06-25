@@ -1,0 +1,13 @@
+﻿@import './fonts.css';
+@import './tailwind.css';
+@import './theme.css';
+@import 'leaflet/dist/leaflet.css';
+
+@keyframes pulse-alert {
+  0%, 100% { box-shadow: 0 0 8px rgba(220,38,38,0.5); transform: scale(1); }
+  50% { box-shadow: 0 0 20px rgba(220,38,38,0.9); transform: scale(1.1); }
+}
+
+.risk-alert-marker {
+  animation: pulse-alert 1.5s infinite;
+}
