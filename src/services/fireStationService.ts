@@ -1,3 +1,5 @@
+import { STATIC_STATIONS } from "../data/fireStations"
+
 const OVERPASS_URL = "https://overpass-api.de/api/interpreter"
 const CACHE_TTL = 24 * 60 * 60 * 1000
 
@@ -26,11 +28,20 @@ export async function fetchFireStations(): Promise<FireStation[]> {
   `
 
   try {
-    const res = await fetch(OVERPASS_URL, {
+    // Intentar POST form-encoded
+    let res = await fetch(OVERPASS_URL, {
       method: "POST",
       headers: { "Content-Type": "application/x-www-form-urlencoded" },
       body: `data=${encodeURIComponent(query)}`,
     })
+    // Fallback: si da 406, probar con texto plano
+    if (res.status === 406) {
+      res = await fetch(OVERPASS_URL, {
+        method: "POST",
+        headers: { "Content-Type": "text/plain" },
+        body: query,
+      })
+    }
     if (!res.ok) throw new Error(`HTTP ${res.status}`)
     const json = await res.json()
 
@@ -53,10 +64,14 @@ export async function fetchFireStations(): Promise<FireStation[]> {
       }
     }
 
-    cache.set("valparaiso", { data: stations, ts: Date.now() })
-    return stations
-  } catch {
-    return []
+    if (stations.length > 0) {
+      cache.set("valparaiso", { data: stations, ts: Date.now() })
+      return stations
+    }
+    throw new Error("Overpass returned 0 stations")
+  } catch (e) {
+    console.warn("[FireStations] Overpass fallback a datos estáticos:", e)
+    return STATIC_STATIONS
   }
 }
 

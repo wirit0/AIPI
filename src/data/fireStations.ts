@@ -1,0 +1,30 @@
+import type { FireStation } from "../services/fireStationService"
+
+// Fallback estático: brigadas de bomberos de la Región de Valparaíso
+export const STATIC_STATIONS: FireStation[] = [
+  { id: 1001, name: "1ra Compañía - Valparaíso",     lat: -33.0462, lng: -71.6206 },
+  { id: 1002, name: "2da Compañía - Valparaíso",     lat: -33.0404, lng: -71.6282 },
+  { id: 1003, name: "3ra Compañía - Valparaíso",     lat: -33.0439, lng: -71.6251 },
+  { id: 1004, name: "4ta Compañía - Valparaíso",     lat: -33.0388, lng: -71.6068 },
+  { id: 1005, name: "5ta Compañía - Viña del Mar",   lat: -33.0245, lng: -71.5528 },
+  { id: 1006, name: "6ta Compañía - Viña del Mar",   lat: -33.0101, lng: -71.5510 },
+  { id: 1007, name: "Bomberos de Quilpué",           lat: -33.0480, lng: -71.4440 },
+  { id: 1008, name: "Bomberos de Villa Alemana",     lat: -33.0432, lng: -71.3728 },
+  { id: 1009, name: "Bomberos de Casablanca",        lat: -33.3190, lng: -71.4034 },
+  { id: 1010, name: "Bomberos de San Antonio",       lat: -33.5943, lng: -71.6192 },
+  { id: 1011, name: "Bomberos de La Ligua",          lat: -32.4520, lng: -71.2311 },
+  { id: 1012, name: "Bomberos de Los Andes",         lat: -32.8340, lng: -70.5997 },
+  { id: 1013, name: "Bomberos de San Felipe",        lat: -32.7500, lng: -70.7265 },
+  { id: 1014, name: "Bomberos de Limache",           lat: -33.0152, lng: -71.2668 },
+  { id: 1015, name: "Bomberos de Concón",            lat: -32.9225, lng: -71.5157 },
+  { id: 1016, name: "Bomberos de Quillota",          lat: -32.8820, lng: -71.2693 },
+  { id: 1017, name: "Bomberos de La Calera",         lat: -32.7873, lng: -71.2057 },
+  { id: 1018, name: "Bomberos de Cartagena",         lat: -33.5535, lng: -71.6094 },
+  { id: 1019, name: "Bomberos de El Quisco",         lat: -33.5662, lng: -71.6892 },
+  { id: 1020, name: "Bomberos de Algarrobo",         lat: -33.3712, lng: -71.6747 },
+  { id: 1021, name: "Bomberos de Santo Domingo",     lat: -33.6371, lng: -71.6448 },
+  { id: 1022, name: "Bomberos de Petorca",           lat: -32.2519, lng: -71.0037 },
+  { id: 1023, name: "Bomberos de Cabildo",           lat: -32.4270, lng: -71.0724 },
+  { id: 1024, name: "Bomberos de Puchuncaví",        lat: -32.7268, lng: -71.4148 },
+  { id: 1025, name: "Bomberos de Nogales",           lat: -32.7492, lng: -71.2162 },
+]
